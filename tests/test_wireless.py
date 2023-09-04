@@ -22,6 +22,7 @@ import types
 from pythonwifi.iwlibs import Wireless, getNICnames
 from pythonwifi.flags import modes, IW_ENCODE_RESTRICTED
 
+
 class TestWireless(unittest.TestCase):
 
     def setUp(self):
@@ -69,32 +70,29 @@ class TestWireless(unittest.TestCase):
         self.wifi.setFrequency(old_freq)
 
         # test setAPaddr - does not work unless AP is real and available
-        #old_mac = self.wifi.getAPaddr()
-        #self.wifi.setAPaddr('61:62:63:64:65:66')
-        #time.sleep(3)                                     # 3 second delay between set and get required
-        #self.assert_(self.wifi.getAPaddr() == '61:62:63:64:65:66')
-        #self.wifi.setAPaddr(old_mac)
+        # old_mac = self.wifi.getAPaddr()
+        # self.wifi.setAPaddr('61:62:63:64:65:66')
+        # time.sleep(3)                                     # 3 second delay between set and get required
+        # self.assert_(self.wifi.getAPaddr() == '61:62:63:64:65:66')
+        # self.wifi.setAPaddr(old_mac)
 
         old_enc = self.wifi.getEncryption()
         self.wifi.setEncryption('restricted')
         self.assert_(self.wifi.getEncryption() == 'restricted')
-        self.assert_(self.wifi.getEncryption(symbolic=False) \
-                        == IW_ENCODE_RESTRICTED+1)
+        self.assert_(self.wifi.getEncryption(symbolic=False) == IW_ENCODE_RESTRICTED + 1)
         self.wifi.setEncryption(old_enc)
 
         try:
             old_key = self.wifi.getKey()
-        except ValueError, msg:
+        except ValueError:
             old_key = None
         self.wifi.setKey('ABCDEF1234', 1)
         self.assert_(self.wifi.getKey() == 'ABCD-EF12-34')
-        self.assert_(map(hex, self.wifi.getKey(formatted=False)) \
-                        == ['0xab', '0xcd', '0xef', '0x12', '0x34'])
+        self.assert_(map(hex, self.wifi.getKey(formatted=False)) == ['0xab', '0xcd', '0xef', '0x12', '0x34'])
         if old_key:
             self.wifi.setKey(old_key, 1)
         else:
             self.wifi.setEncryption('off')
-
 
     def test_wirelessWithNonWifiCard(self):
         self.wifi.ifname = 'eth0'
@@ -116,43 +114,49 @@ class TestWireless(unittest.TestCase):
                    'getSensitivity',
                    'getTXPower',
                    'commit']
-    
+
         for m in methods:
             try:
                 result = getattr(self.wifi, m)()
-            except IOError, (error, msg):
-                self.assertEquals(error, errno.EINVAL)
+            except IOError as ex:
+                error_number, error_string = ex.args
+                self.assertEquals(error_number, errno.EINVAL)
 
         try:
             result = self.wifi.getStatistics()
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EOPNOTSUPP)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EOPNOTSUPP)
 
         try:
             result = self.wifi.setMode('Monitor')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EINVAL)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EINVAL)
 
         try:
             result = self.wifi.setEssid('Joost')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EINVAL)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EINVAL)
 
         try:
             result = self.wifi.setFrequency('2.462GHz')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EINVAL)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EINVAL)
 
         try:
             result = self.wifi.setEncryption('restricted')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EINVAL)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EINVAL)
 
         try:
             result = self.wifi.setKey('ABCDEF1234', 1)
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.EINVAL)
-
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.EINVAL)
 
     def test_wirelessWithNonExistantCard(self):
         self.wifi.ifname = 'eth5'
@@ -174,37 +178,43 @@ class TestWireless(unittest.TestCase):
                    'getSensitivity',
                    'getTXPower',
                    'commit']
-    
+
         for m in methods:
             try:
                 result = getattr(self.wifi, m)()
-            except IOError, (error, msg):
-                self.assertEquals(error, errno.ENODEV)
+            except IOError as ex:
+                error_number, error_string = ex.args
+                self.assertEquals(error_number, errno.ENODEV)
 
         try:
             result = self.wifi.setMode('Monitor')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.ENODEV)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.ENODEV)
 
         try:
             result = self.wifi.setEssid('Joost')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.ENODEV)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.ENODEV)
 
         try:
             result = self.wifi.setFrequency('2.462GHz')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.ENODEV)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.ENODEV)
 
         try:
             result = self.wifi.setEncryption('restricted')
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.ENODEV)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.ENODEV)
 
         try:
             result = self.wifi.setKey('ABCDEF1234', 1)
-        except IOError, (error, msg):
-            self.assertEquals(error, errno.ENODEV)
+        except IOError as ex:
+            error_number, error_string = ex.args
+            self.assertEquals(error_number, errno.ENODEV)
 
 
 suite = unittest.TestSuite()
