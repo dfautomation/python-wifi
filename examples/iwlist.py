@@ -21,7 +21,6 @@
 #
 import errno
 import sys
-import types
 
 import pythonwifi.flags
 from pythonwifi.iwlibs import Wireless, Iwrange, getNICnames

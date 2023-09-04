@@ -21,7 +21,6 @@
 #
 import getopt
 import sys
-import types
 
 import pythonwifi.flags
 from pythonwifi.iwlibs import Wireless, WirelessInfo, Iwrange, getNICnames, getWNICnames

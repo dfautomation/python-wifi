@@ -18,7 +18,6 @@
 #
 import errno
 import unittest
-import types
 from pythonwifi.iwlibs import Wireless, getNICnames
 from pythonwifi.flags import modes, IW_ENCODE_RESTRICTED
 

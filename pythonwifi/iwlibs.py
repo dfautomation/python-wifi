@@ -32,7 +32,6 @@ import time
 import re
 
 import pythonwifi.flags
-from types import StringType, IntType, TupleType
 
 
 KILO = 10**3
@@ -343,7 +342,7 @@ class Wireless(object):
             (1, 'Operation not permitted')
 
         """
-        if type(mode) is IntType:
+        if type(mode) is int:
             mode = mode
         else:
             mode = mode.upper()
@@ -1091,7 +1090,7 @@ class Iwfreq(object):
         self.index = 0
         self.flags = 0
         if data:
-            if isinstance(data, TupleType):
+            if isinstance(data, tuple):
                 self.m, self.e, self.index, self.flags = data
             else:
                 self.parse(data)
