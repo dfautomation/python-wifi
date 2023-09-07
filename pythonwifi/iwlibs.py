@@ -97,7 +97,7 @@ def getConfiguredWNICnames():
     """
     iwstruct = Iwstruct()
     ifnames = []
-    buff = array.array('c', '\0' * 1024)
+    buff = array.array('B', b'\0' * 1024)
     caddr_t, length = buff.buffer_info()
     datastr = iwstruct.pack('iP', length, caddr_t)
     result = iwstruct._fcntl(pythonwifi.flags.SIOCGIFCONF, datastr)
@@ -105,7 +105,7 @@ def getConfiguredWNICnames():
     for i in range(0, 1024, 32):
         ifname = buff.tostring()[i:i + 32]
         ifname = struct.unpack('32s', ifname)[0]
-        ifname = ifname.split('\0', 1)[0]
+        ifname = ifname.split(b'\0', 1)[0]
         if ifname:
             # verify if ifnames are really wifi devices
             wifi = Wireless(ifname)
@@ -315,7 +315,7 @@ class Wireless(object):
         """
         # use an IW_ENCODING_TOKEN_MAX-cell array of NULLs
         #   as space for ioctl to write encryption info
-        iwpoint = Iwpoint('\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX)
+        iwpoint = Iwpoint(b'\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX)
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCGIWENCODE,
                                              data=iwpoint.packed_data)
@@ -1005,15 +1005,15 @@ class Iwstruct(object):
         # ioctl itself looks for the pointer to the address in our
         # memory and the size of it.
         # Don't change the order how the structure is packed!!!
-        buff = array.array('c', '\0' * buffsize)
+        buff = array.array('B', b'\0' * buffsize)
         caddr_t, length = buff.buffer_info()
         datastr = struct.pack('Pi', caddr_t, length)
         return buff, datastr
 
-    def pack_test(self, string, buffsize):
+    def pack_test(self, bytes_data, buffsize):
         """ Packs wireless request data for sending it to the kernel. """
-        buffsize = buffsize - len(string)
-        buff = array.array('c', string + '\0' * buffsize)
+        buffsize = buffsize - len(bytes_data)
+        buff = array.array('B', bytes_data + b'\0' * buffsize)
         caddr_t, length = buff.buffer_info()
         s = struct.pack('PHH', caddr_t, length, 1)
         return buff, s
@@ -1027,14 +1027,16 @@ class Iwstruct(object):
 
     def iw_get_ext(self, ifname, request, data=None):
         """ Read information from ifname. """
+        if ifname is str:
+            ifname = ifname.encode('utf-8')
         buff = pythonwifi.flags.IFNAMSIZE - len(ifname)
-        ifreq = array.array('c', ifname + '\0' * buff)
+        ifreq = array.array('B', ifname + b'\0' * buff)
         # put some additional data behind the interface name
         if data is not None:
             ifreq.extend(data)
         else:
             # extend to 32 bytes for ioctl payload
-            ifreq.extend('\0' * 16)
+            ifreq.extend(b'\0' * 16)
 
         result = self._fcntl(request, ifreq)
         return (result, ifreq[pythonwifi.flags.IFNAMSIZE:])
@@ -1222,10 +1224,12 @@ class Iwpoint(object):
     def __init__(self, data=None, flags=0):
         if data is None:
             raise ValueError('data must be passed to Iwpoint')
+        if data is str:
+            data = data.encode('utf-8')
         # P pointer to data, H length, H flags
         self.fmt = 'PHH'
         self.flags = flags
-        self.buff = array.array('c', data)
+        self.buff = array.array('B', data)
         self.caddr_t, self.length = self.buff.buffer_info()
         self.packed_data = struct.pack(self.fmt, self.caddr_t,
                                        self.length, self.flags)
