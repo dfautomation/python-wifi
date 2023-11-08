@@ -175,9 +175,9 @@ class Wireless(object):
         """
         addr = addr.upper()
         if (addr == "AUTO" or addr == "ANY"):
-            mac_addr = "\xFF" * pythonwifi.flags.ETH_ALEN
+            mac_addr = b"\xFF" * pythonwifi.flags.ETH_ALEN
         elif addr == "OFF":
-            mac_addr = '\x00' * pythonwifi.flags.ETH_ALEN
+            mac_addr = b'\x00' * pythonwifi.flags.ETH_ALEN
         else:
             if ":" not in addr:
                 # not a hardware address
@@ -357,7 +357,7 @@ class Wireless(object):
             numeric_mode = numeric_mode | pythonwifi.flags.IW_ENCODE_RESTRICTED
         elif (mode == 'OFF') or (mode == pythonwifi.flags.IW_ENCODE_DISABLED):
             numeric_mode = numeric_mode | pythonwifi.flags.IW_ENCODE_DISABLED
-        iwpoint = Iwpoint('\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX, numeric_mode)
+        iwpoint = Iwpoint(b'\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX, numeric_mode)
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCSIWENCODE,
                                              data=iwpoint.packed_data)
@@ -725,7 +725,7 @@ class WirelessConfig(object):
         """
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCGIWNAME)
-        return result.tostring().strip('\x00')
+        return result.tostring().strip(b'\x00').decode()
 
     def getEncryption(self):
         """ Returns the encryption status.
@@ -738,7 +738,7 @@ class WirelessConfig(object):
         """
         # use an IW_ENCODING_TOKEN_MAX-cell array of NULLs
         #   as space for ioctl to write encryption info
-        iwpoint = Iwpoint('\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX)
+        iwpoint = Iwpoint(b'\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX)
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCGIWENCODE,
                                              data=iwpoint.packed_data)
@@ -775,7 +775,7 @@ class WirelessConfig(object):
         """
         # use an IW_ENCODING_TOKEN_MAX-cell array of NULLs
         #   as space for ioctl to write encryption info
-        iwpoint = Iwpoint('\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX, key)
+        iwpoint = Iwpoint(b'\x00' * pythonwifi.flags.IW_ENCODING_TOKEN_MAX, key)
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCGIWENCODE,
                                              data=iwpoint.packed_data)
@@ -793,12 +793,12 @@ class WirelessConfig(object):
         """
         # use an IW_ESSID_MAX_SIZE-cell array of NULLs
         #   as space for ioctl to write ESSID
-        iwpoint = Iwpoint('\x00' * pythonwifi.flags.IW_ESSID_MAX_SIZE)
+        iwpoint = Iwpoint(b'\x00' * pythonwifi.flags.IW_ESSID_MAX_SIZE)
         status, result = self.iwstruct.iw_get_ext(self.ifname,
                                              pythonwifi.flags.SIOCGIWESSID,
                                              data=iwpoint.packed_data)
         raw_essid = iwpoint.buff.tostring()
-        return raw_essid.strip('\x00')
+        return raw_essid.strip(b'\x00').decode()
 
     def getMode(self):
         """ Returns currently set operation mode.
@@ -1027,7 +1027,7 @@ class Iwstruct(object):
 
     def iw_get_ext(self, ifname, request, data=None):
         """ Read information from ifname. """
-        if ifname is str:
+        if isinstance(ifname, str):
             ifname = ifname.encode('utf-8')
         buff = pythonwifi.flags.IFNAMSIZE - len(ifname)
         ifreq = array.array('B', ifname + b'\0' * buff)
@@ -1224,7 +1224,7 @@ class Iwpoint(object):
     def __init__(self, data=None, flags=0):
         if data is None:
             raise ValueError('data must be passed to Iwpoint')
-        if data is str:
+        if isinstance(data, str):
             data = data.encode('utf-8')
         # P pointer to data, H length, H flags
         self.fmt = 'PHH'
