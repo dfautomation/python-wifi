@@ -1033,10 +1033,10 @@ class Iwstruct(object):
         ifreq = array.array('B', ifname + b'\0' * buff)
         # put some additional data behind the interface name
         if data is not None:
-            ifreq.extend(data)
+            ifreq.extend(array.array('B', data))
         else:
             # extend to 32 bytes for ioctl payload
-            ifreq.extend(b'\0' * 16)
+            ifreq.extend([0] * 16)
 
         result = self._fcntl(request, ifreq)
         return (result, ifreq[pythonwifi.flags.IFNAMSIZE:])
