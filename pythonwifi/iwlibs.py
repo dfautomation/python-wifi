@@ -30,6 +30,7 @@ import os
 import socket
 import time
 import re
+import six
 
 import pythonwifi.flags
 
@@ -1027,7 +1028,7 @@ class Iwstruct(object):
 
     def iw_get_ext(self, ifname, request, data=None):
         """ Read information from ifname. """
-        if isinstance(ifname, str):
+        if isinstance(ifname, six.text_type):
             ifname = ifname.encode('utf-8')
         buff = pythonwifi.flags.IFNAMSIZE - len(ifname)
         ifreq = array.array('B', ifname + b'\0' * buff)
@@ -1224,7 +1225,7 @@ class Iwpoint(object):
     def __init__(self, data=None, flags=0):
         if data is None:
             raise ValueError('data must be passed to Iwpoint')
-        if isinstance(data, str):
+        if isinstance(data, six.text_type):
             data = data.encode('utf-8')
         # P pointer to data, H length, H flags
         self.fmt = 'PHH'
