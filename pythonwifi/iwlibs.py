@@ -486,11 +486,11 @@ class Wireless(object):
         else:
             if freq == "fixed":
                 freq = self.getFrequency()
-            freq_pattern = re.compile("([\d\.]+)\s?([GMk])\w?", re.I | re.M | re.S)
+            freq_pattern = re.compile(r"([\d\.]+)\s?([GMk])\w?", re.I | re.M | re.S)
             freq_match = freq_pattern.search(freq)
             if freq_match is None:
                 # match failed, try to just find a number (no units)
-                freq_pattern = re.compile("([\d\.]+)", re.I | re.M | re.S)
+                freq_pattern = re.compile(r"([\d\.]+)", re.I | re.M | re.S)
                 freq_match = freq_pattern.search(freq)
                 freq_num, unit = (freq_match.groups()[0], "")
             else:
